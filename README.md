@@ -3,8 +3,8 @@
 Basic implementation of the merkle signing algorithm. It supports:
 
 - Creation of a merkle tree (arbitrary number of leaves, not restricted to 2^n)
-- Merkle tree path generation
-- Merkle tree path verification (see `VerifyPath`)
+- Given a leaf, output merkle tree path
+- Verify tree path (see `VerifyPath`)
 
 ## Merkle tree signature
 
