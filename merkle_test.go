@@ -12,7 +12,7 @@ type UTXO struct {
 	x string
 }
 
-//CalculateHash hashes the values of a TestContent
+//CalculateHash hashes the fields of an UTXO
 func (t UTXO) CalculateHash() ([]byte, error) {
 	h := sha256.New()
 	if _, err := h.Write([]byte(t.x)); err != nil {
@@ -62,7 +62,7 @@ func TestBasic(test *testing.T) {
 	list = append(list, UTXO{x: "4"})
 	list = append(list, UTXO{x: "5"})
 
-	//Create a new Merkle Tree from the list of Content
+	// Create a new Merkle Tree
 	t, err := merkletree.NewTree(list)
 	if err != nil {
 		panic(err)
@@ -78,13 +78,13 @@ func TestBasic(test *testing.T) {
 	}
 
 	/*
-		The signature of the merkle signing UTXO is defined as follows:
-			- merkle root
-			- signature of the merkle root
-			- path from own hash to merkle root
-				- path: the hash path from our own hash to merkle root (own hash and merkle root are not included)
-				- indexes: 0 if the defined hash is a left leaf, 1 if right
-					(idea: indexes can be left out if we fix the order of the leaves (lexicographic), but later)
+	The signature of the merkle signing UTXO is defined as follows:
+		- merkle root
+		- signature of the merkle root
+		- path from own hash to merkle root
+		    - `path`: the hash path from our own hash to merkle root (own hash and merkle root are not included)
+			- `indexes`: 0 if the defined hash is a left leaf, 1 if right
+			(idea: indexes can be left out if we fix the order of the leaves (lexicographic), but later)
 	*/
 
 	fmt.Printf("path verification: %t\n", validPath)
