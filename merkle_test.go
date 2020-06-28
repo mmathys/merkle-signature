@@ -79,12 +79,12 @@ func TestBasic(test *testing.T) {
 
 	/*
 	The signature of the merkle signing UTXO is defined as follows:
-		- merkle root
-		- signature of the merkle root
-		- path from own hash to merkle root
-		    - `path`: the hash path from our own hash to merkle root (own hash and merkle root are not included)
-			- `indexes`: 0 if the defined hash is a left leaf, 1 if right
-			(idea: indexes can be left out if we fix the order of the leaves (lexicographic), but later)
+	- merkle root
+	- signature of the merkle root
+	- path from own hash to merkle root
+		- `path`: the hash path from our own hash to merkle root (own hash and merkle root are not included)
+		- `indexes`: 0 if the defined hash is a left leaf, 1 if right
+		(idea: indexes can be left out if we fix the order of the leaves (lexicographic), but later)
 	*/
 
 	fmt.Printf("path verification: %t\n", validPath)
