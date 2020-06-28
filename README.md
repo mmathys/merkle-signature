@@ -2,7 +2,7 @@
 
 Basic implementation of the merkle signing algorithm. It supports:
 
-- Creation of a merkle tree (arbitrary length)
+- Creation of a merkle tree (arbitrary number of leaves, not restricted to 2^n)
 - Merkle tree path generation
 - Merkle tree path verification (see `VerifyPath`)
 
