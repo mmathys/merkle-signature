@@ -35,7 +35,6 @@ func TestInterface(t *testing.T) {
 		items = append(items, utxo)
 	}
 
-
 	pub, priv, _ := ed25519.GenerateKey(rand.Reader)
 
 	sigs := SignMerkle(&priv, pub, items)
