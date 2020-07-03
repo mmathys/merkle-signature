@@ -2,10 +2,14 @@ package merkle_signing
 
 import (
 	"bytes"
+	"crypto/rand"
 	"crypto/sha256"
+	"crypto/sha512"
 	"fmt"
 	"github.com/cbergoon/merkletree"
+	"github.com/oasisprotocol/ed25519"
 	"log"
+	"strconv"
 	"testing"
 )
 
@@ -28,16 +32,16 @@ func (t UTXO) Equals(other merkletree.Content) (bool, error) {
 	return t.x == other.(UTXO).x, nil
 }
 
-// path verification algorithmus
-func VerifyPath(target []byte, path [][]byte, indexes []int64, master []byte) (bool, error) {
+// This function is for testing only.
+func verifyPath(target []byte, path [][]byte, indexes []bool, master []byte) (bool, error) {
 	// calculate master
 	current := target
 	for i := range path {
-		h := sha256.New()
+		h := sha512.New()
 		hash := path[i]
 		index := indexes[i]
 		var msg []byte
-		if index == 0 {
+		if index == false {
 			// hash is left
 			msg = append(hash, current...)
 		} else {
@@ -64,16 +68,20 @@ func TestBasic(test *testing.T) {
 	list = append(list, UTXO{x: "5"})
 
 	// Create a new Merkle Tree
-	t, err := merkletree.NewTree(list)
+	t, err := merkletree.NewTreeWithHashStrategy(list, sha512.New)
 	if err != nil {
 		panic(err)
 	}
 
 	fmt.Printf("merkle root: %v\n", t.MerkleRoot())
 
-	path, indexes, err := t.GetMerklePath(UTXO{x: "2"})
+	path, indexesInt64, err := t.GetMerklePath(UTXO{x: "2"})
 	hash, _ := UTXO{x: "2"}.CalculateHash()
-	validPath, err := VerifyPath(hash, path, indexes, t.MerkleRoot())
+	indexes := make([]bool, len(indexesInt64))
+	for i, index := range indexesInt64 {
+		indexes[i] = index == 1
+	}
+	validPath, err := verifyPath(hash, path, indexes, t.MerkleRoot())
 	if err != nil {
 		panic(err)
 	}
@@ -82,7 +90,7 @@ func TestBasic(test *testing.T) {
 	}
 
 	path[0][0] = byte(0)
-	invalidPath, err := VerifyPath(hash, path, indexes, t.MerkleRoot())
+	invalidPath, err := verifyPath(hash, path, indexes, t.MerkleRoot())
 	if err != nil {
 		panic(err)
 	}
@@ -90,4 +98,34 @@ func TestBasic(test *testing.T) {
 	if invalidPath {
 		log.Fatalf("had invalid path, but invalidPath was true")
 	}
+}
+
+func TestInterface(t *testing.T) {
+	var items []merkletree.Content
+	for i := 1; i <= 5; i++ {
+		utxo := UTXO{x: strconv.Itoa(i)}
+		items = append(items, utxo)
+	}
+
+
+	pub, priv, _ := ed25519.GenerateKey(rand.Reader)
+
+	sigs := SignMerkle(&priv, pub, items)
+
+	for i, sig := range sigs {
+		hash, err := items[i].CalculateHash()
+		if err != nil {
+			panic(err)
+		}
+
+		valid, err := VerifyMerkle(hash, sig)
+		if err != nil {
+			panic(err)
+		}
+
+		if !valid {
+			t.Fatal("verification was not valid")
+		}
+	}
+
 }
