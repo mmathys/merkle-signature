@@ -3,7 +3,6 @@ package merkle_signing
 import (
 	"crypto"
 	"crypto/sha512"
-	"github.com/cbergoon/merkletree"
 	"github.com/oasisprotocol/ed25519"
 )
 
@@ -14,8 +13,8 @@ type MerkleSig struct {
 	Indexes []bool
 }
 
-func SignMerkle(priv *ed25519.PrivateKey, pub ed25519.PublicKey, items []merkletree.Content) []MerkleSig {
-	t, err := merkletree.NewTreeWithHashStrategy(items, sha512.New)
+func SignMerkle(priv *ed25519.PrivateKey, pub ed25519.PublicKey, hashes [][]byte) []MerkleSig {
+	t, err := NewTreeWithHashStrategy(hashes, sha512.New)
 	if err != nil {
 		panic(err)
 	}
@@ -29,8 +28,8 @@ func SignMerkle(priv *ed25519.PrivateKey, pub ed25519.PublicKey, items []merklet
 		panic(err)
 	}
 
-	sigs := make([]MerkleSig, len(items))
-	for i, item := range items {
+	sigs := make([]MerkleSig, len(hashes))
+	for i, item := range hashes {
 		path, indexesInt64, err := t.GetMerklePath(item)
 		if err != nil {
 			panic(err)

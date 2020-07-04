@@ -3,7 +3,6 @@ package merkle_signing
 import (
 	"crypto/rand"
 	"crypto/sha256"
-	"github.com/cbergoon/merkletree"
 	"github.com/oasisprotocol/ed25519"
 	"strconv"
 	"testing"
@@ -23,29 +22,22 @@ func (t UTXO) CalculateHash() ([]byte, error) {
 	return h.Sum(nil), nil
 }
 
-// exported equals fn
-func (t UTXO) Equals(other merkletree.Content) (bool, error) {
-	return t.x == other.(UTXO).x, nil
-}
-
 func TestInterface(t *testing.T) {
-	var items []merkletree.Content
+	var hashes [][]byte
 	for i := 1; i <= 5; i++ {
-		utxo := UTXO{x: strconv.Itoa(i)}
-		items = append(items, utxo)
+		hash, err := UTXO{x: strconv.Itoa(i)}.CalculateHash()
+		if err != nil {
+			panic(err)
+		}
+		hashes = append(hashes, hash)
 	}
 
 	pub, priv, _ := ed25519.GenerateKey(rand.Reader)
 
-	sigs := SignMerkle(&priv, pub, items)
+	sigs := SignMerkle(&priv, pub, hashes)
 
 	for i, sig := range sigs {
-		hash, err := items[i].CalculateHash()
-		if err != nil {
-			panic(err)
-		}
-
-		valid, err := VerifyMerkle(hash, sig)
+		valid, err := VerifyMerkle(hashes[i], sig)
 		if err != nil {
 			panic(err)
 		}
@@ -58,16 +50,16 @@ func TestInterface(t *testing.T) {
 }
 
 func TestSingle(t *testing.T) {
-	item := UTXO{x: "1"}
-	items := []merkletree.Content{item}
+	hash, err := UTXO{x: "1"}.CalculateHash()
+	if err != nil {
+		panic(err)
+	}
+
+	items := [][]byte{hash}
 	pub, priv, _ := ed25519.GenerateKey(rand.Reader)
 	sigs := SignMerkle(&priv, pub, items)
 	if len(sigs) != 1 {
 		t.Fatal("wrong length")
-	}
-	hash, err := item.CalculateHash()
-	if err != nil {
-		panic(err)
 	}
 
 	valid, err := VerifyMerkle(hash, sigs[0])
