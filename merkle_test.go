@@ -45,6 +45,16 @@ func TestInterface(t *testing.T) {
 		if !valid {
 			t.Fatal("verification was not valid")
 		}
+
+		hashes[i][0] = byte(1)
+		invalid, err := VerifyMerkle(hashes[i], sig)
+		if err != nil {
+			panic(err)
+		}
+
+		if invalid {
+			t.Fatal("wanted invalid verification, but got valid")
+		}
 	}
 
 }
