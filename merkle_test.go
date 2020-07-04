@@ -56,3 +56,26 @@ func TestInterface(t *testing.T) {
 	}
 
 }
+
+func TestSingle(t *testing.T) {
+	item := UTXO{x: "1"}
+	items := []merkletree.Content{item}
+	pub, priv, _ := ed25519.GenerateKey(rand.Reader)
+	sigs := SignMerkle(&priv, pub, items)
+	if len(sigs) != 1 {
+		t.Fatal("wrong length")
+	}
+	hash, err := item.CalculateHash()
+	if err != nil {
+		panic(err)
+	}
+
+	valid, err := VerifyMerkle(hash, sigs[0])
+	if err != nil {
+		panic(err)
+	}
+
+	if !valid {
+		t.Fatal("verification was not valid")
+	}
+}
