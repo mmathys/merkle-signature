@@ -20,4 +20,4 @@ The signature of the merkle signing UTXO is defined as follows:
 
 ## Notes
 
-The original repo is located at https://github.com/mmathys/merkle-signatures
+The original repo is located at https://github.com/mmathys/merkle-signature
